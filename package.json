@@ -11,7 +11,8 @@
         "url": "https://github.com/LucasJones/node-cryptonote-util.git"
     },
     "dependencies" : {
-        "bindings" : "*"
+        "bindings" : "*",
+        "nan" : "*"
     },
     "keywords": [
         "cryptonight",
