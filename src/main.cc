@@ -143,8 +143,9 @@ void get_block_id(const Nan::FunctionCallbackInfo<v8::Value>& info) {
         return THROW_ERROR_EXCEPTION("Failed to calculate hash for block");
     
     char *cstr = reinterpret_cast<char*>(&block_id);
+    v8::Local<v8::Value> returnValue = Nan::CopyBuffer(cstr, 32).ToLocalChecked();
     info.GetReturnValue().Set(
-        Nan::NewBuffer(cstr, 32, callback,0).ToLocalChecked()
+        returnValue
     );
 }
 
