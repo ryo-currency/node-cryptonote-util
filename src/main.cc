@@ -240,13 +240,26 @@ void address_decode(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     
 
     account_public_address adr;
-    if (!::serialization::parse_binary(data, adr))
-        info.GetReturnValue().Set(Nan::Undefined());
+    if (!::serialization::parse_binary(data, adr) || !crypto::check_key(adr.m_spend_public_key) || !crypto::check_key(adr.m_view_public_key))
+    {
+        if(data.length())
+        {
+            data = uint64be_to_blob(prefix) + data;
+        }
+        else
+        {
+            info.GetReturnValue().Set(Nan::Undefined());
+        }
+             v8::Local<v8::Value> returnValue = Nan::CopyBuffer((char*)data.data(), data.size()).ToLocalChecked();
+        info.GetReturnValue().Set(
+            returnValue
+         );
 
-    if (!crypto::check_key(adr.m_spend_public_key) || !crypto::check_key(adr.m_view_public_key))
-        info.GetReturnValue().Set(Nan::Undefined());
-
-    info.GetReturnValue().Set(Nan::New(static_cast<uint32_t>(prefix)));
+    }
+    else
+    {
+        info.GetReturnValue().Set(Nan::New(static_cast<uint32_t>(prefix)));
+    }
 }
 
 NAN_MODULE_INIT(init) {
