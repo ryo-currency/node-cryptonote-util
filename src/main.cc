@@ -98,6 +98,33 @@ NAN_METHOD(convert_blob) {
     if (!parse_and_validate_block_from_blob(input, b))
         return THROW_ERROR_EXCEPTION("Failed to parse block");
 
+    if (!get_block_hashing_blob(b, output))
+        return THROW_ERROR_EXCEPTION("Failed to create mining block");
+    
+    v8::Local<v8::Value> returnValue = Nan::CopyBuffer((char*)output.data(), output.size()).ToLocalChecked();
+    info.GetReturnValue().Set(
+        returnValue
+    );
+}
+
+NAN_METHOD(convert_blob_fa) {
+
+    if (info.Length() < 1)
+        return THROW_ERROR_EXCEPTION("You must provide one argument.");
+
+    Local<Object> target = info[0]->ToObject();
+
+    if (!Buffer::HasInstance(target))
+        return THROW_ERROR_EXCEPTION("Argument should be a buffer object.");
+
+    blobdata input = std::string(Buffer::Data(target), Buffer::Length(target));
+    blobdata output = "";
+
+    //convert
+    block b = AUTO_VAL_INIT(b);
+    if (!parse_and_validate_block_from_blob(input, b))
+        return THROW_ERROR_EXCEPTION("Failed to parse block");
+
     if (b.major_version < BLOCK_MAJOR_VERSION_2) {
         if (!get_block_hashing_blob(b, output))
             return THROW_ERROR_EXCEPTION("Failed to create mining block");
