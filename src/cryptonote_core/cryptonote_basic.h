@@ -470,15 +470,6 @@ namespace cryptonote
 
   // Implemented below
   inline serializable_bytecoin_block make_serializable_bytecoin_block(const block& b, bool hashing_serialization, bool header_only);
-struct RootBlock {
-  uint8_t majorVersion;
-  uint8_t minorVersion;
-  crypto::hash previousBlockHash;
-  uint16_t transactionCount;
-  std::vector<crypto::hash> baseTransactionBranch;
-  transaction baseTransaction;
-  std::vector<crypto::hash> blockchainBranch;
-};
 
   struct block_header
   {
@@ -487,6 +478,7 @@ struct RootBlock {
     uint64_t timestamp;
     crypto::hash prev_id;
     uint32_t nonce;
+
     BEGIN_SERIALIZE()
       VARINT_FIELD(major_version)
       VARINT_FIELD(minor_version)
@@ -499,7 +491,7 @@ struct RootBlock {
   struct block: public block_header
   {
     bytecoin_block parent_block;
-    RootBlock rootBlock;
+
     transaction miner_tx;
     std::vector<crypto::hash> tx_hashes;
 
