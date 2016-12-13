@@ -125,12 +125,10 @@ namespace rct {
     typedef unsigned int bits[ATOMS];
     typedef key key64[64];
 
-    //just contains the necessary keys to represent asnlSigs
-    //c.f. http://eprint.iacr.org/2015/1098
-    struct asnlSig {
-        key64 L1;
-        key64 s2;
-        key s;
+    struct boroSig {
+        key64 s0;
+        key64 s1;
+        key ee;
     };
   
     //Container for precomp
@@ -151,14 +149,14 @@ namespace rct {
             // FIELD(II) - not serialized, it can be reconstructed
         END_SERIALIZE()
     };
-    //contains the data for an asnl sig
+    //contains the data for an Borromean sig
     // also contains the "Ci" values such that
     // \sum Ci = C
     // and the signature proves that each Ci is either
     // a Pedersen commitment to 0 or to 2^i
     //thus proving that C is in the range of [0, 2^64]
     struct rangeSig {
-        asnlSig asig;
+        boroSig asig;
         key64 Ci;
 
         BEGIN_SERIALIZE_OBJECT()
@@ -281,6 +279,7 @@ namespace rct {
             // we save the MGs contents directly, because we want it to save its
             // arrays and matrices without the size prefixes, and the load can't
             // know what size to expect if it's not in the data
+            ar.begin_object();
             ar.tag("ss");
             ar.begin_array();
             PREPARE_CUSTOM_VECTOR_SERIALIZATION(mixin + 1, MGs[i].ss);
@@ -296,7 +295,7 @@ namespace rct {
               for (size_t k = 0; k < mg_ss2_elements; ++k)
               {
                 FIELDS(MGs[i].ss[j][k])
-                if (mg_ss2_elements - j > 1)
+                if (mg_ss2_elements - k > 1)
                   ar.delimit_array();
               }
               ar.end_array();
@@ -306,10 +305,13 @@ namespace rct {
             }
             ar.end_array();
 
+            ar.tag("cc");
             FIELDS(MGs[i].cc)
             // MGs[i].II not saved, it can be reconstructed
             if (mg_elements - i > 1)
               ar.delimit_array();
+
+            ar.end_object();
           }
           ar.end_array();
           return true;
@@ -415,7 +417,7 @@ namespace rct {
     // then the value in the first 8 bytes is returned
     xmr_amount h2d(const key &test);
     //32 byte key to int[64]
-    void h2b(bits  amountb2, key & test);
+    void h2b(bits  amountb2, const key & test);
     //int[64] to 32 byte key
     void b2h(key  & amountdh, bits amountb2);
     //int[64] to uint long long
@@ -448,7 +450,7 @@ inline std::ostream &operator <<(std::ostream &o, const rct::key &v) { return pr
 BLOB_SERIALIZER(rct::key);
 BLOB_SERIALIZER(rct::key64);
 BLOB_SERIALIZER(rct::ctkey);
-BLOB_SERIALIZER(rct::asnlSig);
+BLOB_SERIALIZER(rct::boroSig);
 
 VARIANT_TAG(debug_archive, rct::key, "rct::key");
 VARIANT_TAG(debug_archive, rct::key64, "rct::key64");
@@ -460,7 +462,7 @@ VARIANT_TAG(debug_archive, rct::ctkeyM, "rct::ctkeyM");
 VARIANT_TAG(debug_archive, rct::ecdhTuple, "rct::ecdhTuple");
 VARIANT_TAG(debug_archive, rct::mgSig, "rct::mgSig");
 VARIANT_TAG(debug_archive, rct::rangeSig, "rct::rangeSig");
-VARIANT_TAG(debug_archive, rct::asnlSig, "rct::asnlSig");
+VARIANT_TAG(debug_archive, rct::boroSig, "rct::boroSig");
 VARIANT_TAG(debug_archive, rct::rctSig, "rct::rctSig");
 
 VARIANT_TAG(binary_archive, rct::key, 0x90);
@@ -473,7 +475,7 @@ VARIANT_TAG(binary_archive, rct::ctkeyM, 0x96);
 VARIANT_TAG(binary_archive, rct::ecdhTuple, 0x97);
 VARIANT_TAG(binary_archive, rct::mgSig, 0x98);
 VARIANT_TAG(binary_archive, rct::rangeSig, 0x99);
-VARIANT_TAG(binary_archive, rct::asnlSig, 0x9a);
+VARIANT_TAG(binary_archive, rct::boroSig, 0x9a);
 VARIANT_TAG(binary_archive, rct::rctSig, 0x9b);
 
 VARIANT_TAG(json_archive, rct::key, "rct_key");
@@ -486,7 +488,7 @@ VARIANT_TAG(json_archive, rct::ctkeyM, "rct_ctkeyM");
 VARIANT_TAG(json_archive, rct::ecdhTuple, "rct_ecdhTuple");
 VARIANT_TAG(json_archive, rct::mgSig, "rct_mgSig");
 VARIANT_TAG(json_archive, rct::rangeSig, "rct_rangeSig");
-VARIANT_TAG(json_archive, rct::asnlSig, "rct_asnlSig");
+VARIANT_TAG(json_archive, rct::boroSig, "rct_boroSig");
 VARIANT_TAG(json_archive, rct::rctSig, "rct_rctSig");
 
 #endif  /* RCTTYPES_H */
