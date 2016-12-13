@@ -650,16 +650,6 @@ namespace cryptonote
     if (!get_block_hashing_blob(b, blob))
       return false;
 
-//    if (BLOCK_MAJOR_VERSION_2 <= b.major_version)
-//    {
-//      blobdata parent_blob;
-//      auto sbb = make_serializable_bytecoin_block(b, true, false);
-//      if (!t_serializable_object_to_blob(sbb, parent_blob))
-//        return false;
-
-//      blob.append(parent_blob);
-//    }
-
     return get_object_hash(blob, res);
   }
   //---------------------------------------------------------------
@@ -698,8 +688,6 @@ namespace cryptonote
     string_tools::parse_hexstr_to_binbuff(genesis_coinbase_tx_hex, tx_bl);
     bool r = parse_and_validate_tx_from_blob(tx_bl, bl.miner_tx);
     CHECK_AND_ASSERT_MES(r, false, "failed to parse coinbase tx from hard coded blob");
-    bl.major_version = CURRENT_BLOCK_MAJOR_VERSION;
-    bl.minor_version = CURRENT_BLOCK_MINOR_VERSION;
     bl.timestamp = 0;
     bl.nonce = 10000;
     miner::find_nonce_for_given_block(bl, 1, 0);
@@ -851,8 +839,6 @@ namespace cryptonote
   //---------------------------------------------------------------
   bool check_proof_of_work_v1(const block& bl, difficulty_type current_diffic, crypto::hash& proof_of_work)
   {
-//    if (BLOCK_MAJOR_VERSION_1 != bl.major_version)
-//      return false;
 
     proof_of_work = get_block_longhash(bl, 0);
     return check_hash(proof_of_work, current_diffic);
@@ -860,8 +846,6 @@ namespace cryptonote
   //---------------------------------------------------------------
   bool check_proof_of_work_v2(const block& bl, difficulty_type current_diffic, crypto::hash& proof_of_work)
   {
-    if (BLOCK_MAJOR_VERSION_2 != bl.major_version)
-      return false;
 
     if (!get_bytecoin_block_longhash(bl, proof_of_work))
       return false;
@@ -896,13 +880,6 @@ namespace cryptonote
   //---------------------------------------------------------------
   bool check_proof_of_work(const block& bl, difficulty_type current_diffic, crypto::hash& proof_of_work)
   {
-    switch (bl.major_version)
-    {
-    case BLOCK_MAJOR_VERSION_1: return check_proof_of_work_v1(bl, current_diffic, proof_of_work);
-    case BLOCK_MAJOR_VERSION_2: return check_proof_of_work_v1(bl, current_diffic, proof_of_work);
-    }
-
-    CHECK_AND_ASSERT_MES(false, false, "unknown block major version: " << bl.major_version << "." << bl.minor_version);
   }
   //---------------------------------------------------------------
 }
