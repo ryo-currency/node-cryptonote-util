@@ -14,3 +14,5 @@
 
 #define CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW            60
 #define CRYPTONOTE_DISPLAY_DECIMAL_POINT                12
+
+#define TX_FORK_ID_STR                                  "ryo-currency"
